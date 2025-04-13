@@ -116,7 +116,6 @@ def handle_message(message):
 
 @app.route('/')
 def root():
-	# Clear session to ensure user is logged out when first accessing the site
 	session.clear()
 	return redirect('/home')
 
