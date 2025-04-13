@@ -175,3 +175,14 @@ def processregister():
     result = db.createUser(email=email, password=password, role=role, name=name)
     
     return json.dumps(result)
+@socketio.on_error_default
+def default_error_handler(e):
+    print(f"Socket.IO Error: {str(e)}")
+
+@socketio.on('connect', namespace='/chat')
+def test_connect():
+    print('Client connected to chat namespace')
+    
+@socketio.on('disconnect', namespace='/chat')
+def test_disconnect():
+    print('Client disconnected from chat namespace')

@@ -8,7 +8,13 @@ from flask import Flask
 from flask_socketio import SocketIO
 from flask_failsafe import failsafe
 
-socketio = SocketIO(cors_allowed_origins="*")
+socketio = SocketIO(
+    cors_allowed_origins="*",
+    logger=True,
+    engineio_logger=True,
+    ping_timeout=60,
+    ping_interval=25
+)
 
 #--------------------------------------------------
 # Create a Failsafe Web Application
