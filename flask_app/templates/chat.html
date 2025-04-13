@@ -93,18 +93,18 @@
     var isOwner = {% if session.get('role') == 'owner' %}true{% else %}false{% endif %};
     
     $(document).ready(function(){
-        // Force HTTPS for the connection
-        var wsProtocol = 'https:';
+        // Use the current protocol (http for local, https for production)
+        var protocol = window.location.protocol;
         var host = window.location.host;
         
         // Connect to the socket server with more robust configuration
-        socket = io.connect(wsProtocol + '//' + host + '/chat', {
+        socket = io.connect(protocol + '//' + host + '/chat', {
             transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
             timeout: 20000,
-            secure: true,
+            secure: protocol === 'https:',
             rejectUnauthorized: false
         });
         

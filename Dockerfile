@@ -33,8 +33,7 @@ EXPOSE 8080
 ENV PORT 8080
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
-ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 # Start MySQL and the application
-CMD service mysql start && exec gunicorn --bind :$PORT --workers 1 --worker-class eventlet --threads 8 --timeout 0 --log-level debug --certfile=/etc/ssl/certs/ca-certificates.crt app:app
+CMD service mysql start && exec gunicorn --bind :$PORT --workers 1 --worker-class eventlet --threads 8 --timeout 0 --log-level debug app:app
 # ----------------------------------------------------- 
