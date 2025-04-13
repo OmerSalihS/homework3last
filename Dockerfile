@@ -25,7 +25,7 @@ WORKDIR /app
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Open ports, set environment variables, start gunicorn.
+# Open ports, set environment variables
 EXPOSE 8080 
 ENV PORT 8080
 ENV FLASK_ENV=production
@@ -35,16 +35,20 @@ ENV MYSQL_USER=master
 ENV MYSQL_PASSWORD=master
 ENV MYSQL_DATABASE=db
 
-# Start MySQL and run the application
-CMD service mysql start && \
-    mysql -e "ALTER USER 'master'@'%' IDENTIFIED WITH mysql_native_password BY 'master';" && \
-    exec gunicorn --bind :$PORT \
-    --workers 1 \
-    --worker-class eventlet \
-    --threads 8 \
-    --timeout 0 \
-    --log-level debug \
-    --access-logfile - \
-    --error-logfile - \
-    app:app
+# Create startup script
+RUN echo '#!/bin/bash\n\
+service mysql start\n\
+mysql -e "ALTER USER '\''master'\''@'\''%'\'' IDENTIFIED WITH mysql_native_password BY '\''master'\'';"\n\
+exec gunicorn --bind 0.0.0.0:$PORT \\\n\
+    --workers 1 \\\n\
+    --worker-class eventlet \\\n\
+    --threads 8 \\\n\
+    --timeout 0 \\\n\
+    --log-level debug \\\n\
+    --access-logfile - \\\n\
+    --error-logfile - \\\n\
+    app:app' > /app/start.sh && chmod +x /app/start.sh
+
+# Start the application
+CMD ["/app/start.sh"]
 # ----------------------------------------------------- 
