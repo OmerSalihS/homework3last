@@ -37,9 +37,22 @@ ENV MYSQL_DATABASE=db
 
 # Create startup script
 RUN echo '#!/bin/bash\n\
+\n\
+# Start MySQL\n\
 service mysql start\n\
+\n\
+# Wait for MySQL to be ready\n\
+until mysqladmin ping -h localhost --silent; do\n\
+    echo "Waiting for MySQL to be ready..."\n\
+    sleep 1\n\
+done\n\
+\n\
+# Configure MySQL user\n\
 mysql -e "ALTER USER '\''master'\''@'\''%'\'' IDENTIFIED WITH mysql_native_password BY '\''master'\'';"\n\
-exec gunicorn --bind 0.0.0.0:$PORT \\\n\
+\n\
+# Start the application\n\
+exec gunicorn \\\n\
+    --bind 0.0.0.0:$PORT \\\n\
     --workers 1 \\\n\
     --worker-class eventlet \\\n\
     --threads 8 \\\n\
@@ -47,6 +60,7 @@ exec gunicorn --bind 0.0.0.0:$PORT \\\n\
     --log-level debug \\\n\
     --access-logfile - \\\n\
     --error-logfile - \\\n\
+    --preload \\\n\
     app:app' > /app/start.sh && chmod +x /app/start.sh
 
 # Start the application
