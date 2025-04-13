@@ -93,24 +93,35 @@
     var isOwner = {% if session.get('role') == 'owner' %}true{% else %}false{% endif %};
     
     $(document).ready(function(){
-        // Connect to the socket server
-        socket = io.connect('http://' + document.domain + ':' + location.port + '/chat', {
-    transports: ['polling', 'websocket']
-      });
+        // Force HTTPS for the connection
+        var wsProtocol = 'https:';
+        var host = window.location.host;
+        
+        // Connect to the socket server with more robust configuration
+        socket = io.connect(wsProtocol + '//' + host + '/chat', {
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            timeout: 20000,
+            secure: true,
+            rejectUnauthorized: false
+        });
+        
         // Debug connection events
         socket.on('connect', function() {
-    console.log('Connected to server with ID:', socket.id);
-    });
-
-    socket.on('connect_error', function(error) {
-        console.error('Connection error details:', error);
-        // Try to reconnect using polling after failures
-        if (socket.io.engine && socket.io.engine.transport && socket.io.engine.transport.name === 'websocket') {
-            console.log('Falling back to polling transport');
-            socket.io.opts.transports = ['polling'];
-            socket.disconnect().connect();
-        }
-    });
+            console.log('Connected to server successfully');
+            socket.emit('joined', {});
+        });
+        
+        socket.on('connect_error', function(error) {
+            console.error('Connection error:', error);
+            // Try to reconnect with polling if websocket fails
+            if (socket.io.engine.transport.name === 'websocket') {
+                console.log('Falling back to polling transport');
+                socket.io.engine.transport.name = 'polling';
+            }
+        });
         
         socket.on('disconnect', function() {
             console.log('Disconnected from server');
