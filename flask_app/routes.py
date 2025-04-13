@@ -85,14 +85,14 @@ def joined(message):
     user = getUser()
     is_owner = session.get('role') == 'owner'
     role = "Owner" if is_owner else "Guest"
-    emit('status', {'msg': f"{user} ({role}) has entered the room.", 'class': 'system-message'}, room='main')
+    emit('status', {'msg': f"{user} ({role}) has entered the room.", 'class': 'system-message'}, broadcast=True)
 
 @socketio.on('left', namespace='/chat')
 def left(message):
     user = getUser()
     is_owner = session.get('role') == 'owner'
     role = "Owner" if is_owner else "Guest"
-    emit('status', {'msg': f"{user} ({role}) has left the room.", 'class': 'system-message'}, room='main')
+    emit('status', {'msg': f"{user} ({role}) has left the room.", 'class': 'system-message'}, broadcast=True)
     leave_room('main')
 
 @socketio.on('message', namespace='/chat')
@@ -107,8 +107,8 @@ def handle_message(message):
     # Format the message with the user's name and role
     formatted_msg = f"{user} ({role}): {message['msg']}"
     
-    # Emit the message to all users in the room
-    emit('status', {'msg': formatted_msg, 'class': msg_class}, room='main')
+    # Emit the message to all connected clients
+    emit('status', {'msg': formatted_msg, 'class': msg_class}, broadcast=True)
 
 #######################################################################################
 # OTHER
